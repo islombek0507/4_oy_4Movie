@@ -39,7 +39,7 @@
 						
 						<h3 class="h3 mt-4">Bookmarked movies</h3>
 						
-						<ul class="list-group pb-5">
+						<ul class="list-group pb-5 bookmarked-list">
 												
 						</ul>
 						
@@ -86,7 +86,7 @@
 				<div class="pb-3">
 					<a class="btn btn-outline-primary btn-sm me-3 card-link" href="">Watch trailer</a>
 					<button class="btn btn-outline-info btn-sm me-3">More info</button>
-					<button class="btn btn-outline-success btn-sm">Bookmarks</button>
+					<button class="btn btn-outline-success btn-sm bookmark-btn" >Bookmarks</button>
 				</div>
 			</div>
 		</div>
@@ -94,8 +94,8 @@
 
 	<template id="bookmarked">
 		<li class="list-group-item">
-			<p class="fw-bold">Avegers: Infinity War</p>
-			<button type="button" class="btn btn-danger">Remove</button>
+			<p class="fw-bold movie-title">Avegers: Infinity War</p>
+			<button type="button" class="btn btn-danger btn-remove">Remove</button>
 		</li>
 	</template>
 
@@ -103,6 +103,7 @@
 	
 	<script src="./js/bootstrap.js"></script>
 	<script src="./js/movies.js"></script>
+	<!-- <script src="./js/test.js"></script> -->
 	<script src="./js/main.js"></script>
 </body>
 </html>

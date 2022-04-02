@@ -1,4 +1,6 @@
-let elWrapper =document.querySelector("#wrapper");
+// Select elements from DOM 
+let elWrapper = document.querySelector("#wrapper");
+let elBookmarkedList = document.querySelector(".bookmarked-list");
 let elForm = document.querySelector("#form");
 var elSearchInput = document.querySelector("#search_input")
 let elCategorySelect = document.querySelector("#category-select");
@@ -7,7 +9,11 @@ let elSort = document.querySelector("#rating_sort");
 let elBtn = document.querySelector("#btn");
 let elTitle = document.querySelector("#search-result");
 let elTemplate = document.querySelector("#movie_card").content;
-let slicedMovies = movies.slice(0, 150);
+let elBookmarkTemplate = document.querySelector("#bookmarked").content;
+
+// Get movies list 
+let slicedMovies = movies.slice(0, 10);
+
 var normolizedMovieList = slicedMovies.map((movieItem, index) => {
     return {
         id: index + 1,
@@ -20,6 +26,7 @@ var normolizedMovieList = slicedMovies.map((movieItem, index) => {
     }
 })
 
+// Create categories
 function generateCategories(movieArray) {
     let categoryList = []
     
@@ -32,23 +39,25 @@ function generateCategories(movieArray) {
             }
         })
     })
+    
     categoryList.sort()
-      
+    
     let categoryFragment = document.createDocumentFragment()
-
+    
     categoryList.forEach(function (item) {
         let categoryOption = document.createElement("option");
         categoryOption.value = item
         categoryOption.textContent = item
         categoryFragment.appendChild(categoryOption)
     })
-   
+    
     
     elCategorySelect.appendChild(categoryFragment)
 }
-  generateCategories(normolizedMovieList)
+generateCategories(normolizedMovieList)
 
-  function renderMovies(movieArray, wrapper){
+// Create render function
+function renderMovies(movieArray, wrapper){
     wrapper.innerHTML = null;
     let elFragment = document.createDocumentFragment()
     
@@ -61,6 +70,7 @@ function generateCategories(movieArray) {
         templateDiv.querySelector(".card-year").textContent = movie.year
         templateDiv.querySelector(".card-rate").textContent = movie.rating
         templateDiv.querySelector(".card-link").href = movie.youtubeLink
+        templateDiv.querySelector(".bookmark-btn").dataset.movieItemId = movie.id
         
         elFragment.appendChild(templateDiv);
     });
@@ -70,6 +80,7 @@ function generateCategories(movieArray) {
 }
 
 renderMovies(normolizedMovieList, elWrapper);
+
 
 var findMovies = function (movie_title, minRating, genre) {
     
@@ -83,7 +94,7 @@ var findMovies = function (movie_title, minRating, genre) {
 
 elForm.addEventListener("input", function(evt) {
     evt.preventDefault()
-
+    
     let searchInput = elSearchInput.value.trim()
     let ratingInput = elRating.value.trim()
     let selectOption = elCategorySelect.value
@@ -91,14 +102,95 @@ elForm.addEventListener("input", function(evt) {
     
     let pattern = new RegExp(searchInput, "gi")
     let resultArray = findMovies(pattern, ratingInput, selectOption)
-
+    
     if (sortingType === "high") {
         resultArray.sort((b, a) => a.rating - b.rating)
     }
-
+    
     if (sortingType === "low") {
         resultArray.sort((a, b) => a.rating - b.rating)
     }
-
+    
     renderMovies(resultArray , elWrapper);
 })
+
+
+
+
+let storage = window.localStorage;
+
+let bookmarkedMovies = JSON.parse(storage.getItem("movieArray")) || []
+
+// if (getItemFromLocalStorage) {
+//     bookmarkedMovies = getItemFromLocalStorage
+// }else {
+//     bookmarkedMovies = []
+// }
+
+
+elWrapper.addEventListener("click", function(evt) {
+    let movieID = evt.target.dataset.movieItemId;
+    
+    if (movieID) {
+        let foundMovie = normolizedMovieList.find( item => item.id == movieID )
+        
+        let doesInclude = bookmarkedMovies.findIndex(item => item.id === foundMovie.id)
+        
+        if (doesInclude === -1) {
+            bookmarkedMovies.push(foundMovie)
+            storage.setItem("movieArray", JSON.stringify(bookmarkedMovies))
+            
+            renderBookmarkedMovies(bookmarkedMovies, elBookmarkedList)
+        }
+    }
+    
+})
+//Render bookmarked movies
+function renderBookmarkedMovies(array, wrapper) {
+    wrapper.innerHTML = null;
+    let elFragment = document.createDocumentFragment()
+    array.forEach(function(item) {
+        let templateBookmark = elBookmarkTemplate.cloneNode(true)
+        
+        templateBookmark.querySelector(".movie-title").textContent = item.title
+        templateBookmark.querySelector(".btn-remove").dataset.markedId = item.id
+        
+        elFragment.appendChild(templateBookmark)
+        console.log(elFragment);
+    })
+    
+    wrapper.appendChild(elFragment)
+}
+
+renderBookmarkedMovies(bookmarkedMovies, elBookmarkedList);
+// htmldagi malumotlarni ochirish jarayoni
+elBookmarkedList.addEventListener("click", function(evt) {
+    let removedMovieId = evt.target.dataset.markedId;
+    
+    if (removedMovieId) {
+        let indexOfMovie = bookmarkedMovies.findIndex(function (item) {
+            return item.id == removedMovieId
+        })
+        
+        bookmarkedMovies.splice(indexOfMovie, 1)
+        storage.setItem("movieArray", JSON.stringify(bookmarkedMovies))
+        storage.clear()
+        
+        renderBookmarkedMovies(bookmarkedMovies, elBookmarkedList);
+    }
+    
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
